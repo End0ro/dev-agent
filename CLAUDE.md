@@ -62,7 +62,7 @@ If both work, the idea is possible. If not, stop and find out why. Do not build 
 
 ## Skills
 
-Skills live in `.claude/skills/`. Installed (27):
+Skills live in `.claude/skills/`. Installed (19):
 
 **Process (use these for every development task)**
 - `using-superpowers`: the starter skill. Check for a matching skill before acting.
@@ -89,11 +89,7 @@ Skills live in `.claude/skills/`. Installed (27):
 - `agent-introspection-debugging`: structured debugging when an agent run fails.
 - `strategic-compact`: when to compact context. Text only here, the hook is not installed.
 
-**Interface work (for any UI the project gets)**
-- `frontend-design`, `design-taste-frontend`, `apple-design`, `emil-design-eng`
-- `animate`, `review-animations`, `find-animation-opportunities`, `animation-vocabulary`
-
-Origin: copied from the superpowers set (MIT) and from Ahmed's CLAUDE-files repo, and edited for this project: no design or plan files in git, no visual companion. Marketing and business skills are left out on purpose. Keep this list in sync when a skill is added or removed.
+Origin: copied from the superpowers set (MIT) and from Ahmed's CLAUDE-files repo, and edited for this project: no design or plan files in git, no visual companion. Marketing, business and interface/animation skills are left out on purpose. Add the interface ones when the project gets a UI. Keep this list in sync when a skill is added or removed.
 
 ## Source material
 
