@@ -15,7 +15,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** If working in an isolated worktree, it should have been created via the `using-git-worktrees` skill at execution time.
 
-**Keep plans in chat.** Do not save the plan as a file or commit it. Present it as chat text and get approval there.
+**Keep plans in chat, never committed.** Present the plan as chat text and get approval there. Do not put it in a tracked file. The one exception: subagent-driven-development needs a file, so write it to `.superpowers/plan.md`, which is git-ignored.
 
 ## Scope Check
 
@@ -154,4 +154,10 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Execution Handoff
 
-After presenting the plan in chat, ask: "Plan is ready. Want changes, or should I start with task 1?" Then execute the tasks in order in this session, following test-driven-development and verification-before-completion, and check in after each task.
+After presenting the plan in chat, ask: "Plan is ready. Want changes? Then pick how to run it:
+
+1. **Subagents (recommended):** a fresh helper per task, reviewed after each. I save the plan to `.superpowers/plan.md` (git-ignored, never committed).
+2. **Inline:** I do the tasks in order in this session and check in after each one."
+
+If subagents: use subagent-driven-development.
+If inline: use executing-plans. Either way follow test-driven-development and verification-before-completion.

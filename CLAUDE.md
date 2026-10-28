@@ -62,8 +62,10 @@ If both work, the idea is possible. If not, stop and find out why. Do not build 
 
 ## Skills
 
-Skills live in `.claude/skills/`. Installed:
+Skills live in `.claude/skills/`. Installed (27):
 
+**Process (use these for every development task)**
+- `using-superpowers`: the starter skill. Check for a matching skill before acting.
 - `brainstorming`: before any new feature or behavior change. Design stays in chat.
 - `writing-plans`: turn the approved design into small ordered tasks. Plan stays in chat.
 - `test-driven-development`: tests first, then code.
@@ -72,9 +74,26 @@ Skills live in `.claude/skills/`. Installed:
 - `requesting-code-review` and `receiving-code-review`: review before merge, and verify feedback before applying it.
 - `using-git-worktrees`: isolate feature work.
 - `finishing-a-development-branch`: decide merge, PR, or cleanup when work is done.
-- `eval-harness`: prove claims about agent behavior with numbers (hooks survive /compact, notes reduce rereading).
 
-Origin: the workflow skills are copied from the superpowers set (MIT) and edited for this project: no design or plan files, no visual companion, no subagent skills. Keep this list in sync when a skill is added or removed.
+**Running a plan**
+- `subagent-driven-development`: a fresh helper per task, reviewed after each. Needs the plan in `.superpowers/plan.md` (git-ignored).
+- `executing-plans`: run the plan inline in one session.
+- `dispatching-parallel-agents`: 2 or more independent tasks at once.
+
+**Proving claims**
+- `eval-harness`: numbers for claims about agent behavior (hooks survive /compact, notes reduce rereading).
+
+**Building agents and skills**
+- `writing-skills`, `skill-builder`: create and check skills.
+- `create-subagent`: design a new subagent.
+- `agent-introspection-debugging`: structured debugging when an agent run fails.
+- `strategic-compact`: when to compact context. Text only here, the hook is not installed.
+
+**Interface work (for any UI the project gets)**
+- `frontend-design`, `design-taste-frontend`, `apple-design`, `emil-design-eng`
+- `animate`, `review-animations`, `find-animation-opportunities`, `animation-vocabulary`
+
+Origin: copied from the superpowers set (MIT) and from Ahmed's CLAUDE-files repo, and edited for this project: no design or plan files in git, no visual companion. Marketing and business skills are left out on purpose. Keep this list in sync when a skill is added or removed.
 
 ## Source material
 
