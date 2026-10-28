@@ -37,18 +37,22 @@ Not in V0:
 - No AI calls inside hooks. They are too slow, and SessionEnd only has about 1.5 seconds.
 - Prototype in Python or TypeScript. Rust waits until the idea is proven.
 
-## First task
+## Status
 
-Before building anything, run the compaction test:
-1. A hook prints the secret word MARKER-7431 at session start.
-2. Chat a few turns, run /compact, then ask "What is the secret word?"
-3. Run /clear and ask again.
-If both work, the idea is possible. If not, stop and find out why. Do not build on top of a failed test.
+As of 2026-10-28:
+- **Compaction test: passed.** Ahmed ran it in a real Claude Code session. The secret word MARKER-7431, printed by a SessionStart hook, was still known after `/compact` and after `/clear`. So the idea is possible. (Result reported by Ahmed. Exact Claude Code version and hook config were not recorded. Write them down if the test is repeated.)
+- V0 is not built yet. Nothing beyond the test hook exists.
+
+## Next steps
+
+1. Question 2 below: A/B test whether file notes reduce file rereading. Use the eval-harness skill, and define the check before building.
+2. Build the V0 pieces in the project repo, in this order: the small project file, the SessionStart hook that injects it, then the per-file notes with hashes and stale marking.
+3. Hooks fail open, no AI calls inside hooks, notes are written by the agent right after an edit.
 
 ## Open questions
 
-1. Do hooks still fire and inject after /compact and /clear? (Docs say yes for SessionStart with the `compact` and `clear` matchers. Not tested yet.)
-2. Do file notes reduce file rereading? A/B test: same task with and without notes, count files read.
+1. ~~Do hooks still fire and inject after /compact and /clear?~~ Answered 2026-10-28: yes, tested by Ahmed (see Status).
+2. Do file notes reduce file rereading? A/B test: same task with and without notes, count files read. Not tested yet.
 3. Research citations in the old specs are unverified. Check papers, issue numbers and versions against official docs before relying on them.
 
 ## How to work
