@@ -62,7 +62,19 @@ If both work, the idea is possible. If not, stop and find out why. Do not build 
 
 ## Skills
 
-Skills live in `.claude/skills/`. Not installed yet. Planned base: the stack-neutral workflow skills (brainstorming, writing-plans, test-driven-development, systematic-debugging, verification-before-completion, requesting and receiving code review, using-git-worktrees, finishing-a-development-branch), plus an eval skill to measure whether the notes help. Add each skill here when it is installed.
+Skills live in `.claude/skills/`. Installed:
+
+- `brainstorming`: before any new feature or behavior change. Design stays in chat.
+- `writing-plans`: turn the approved design into small ordered tasks. Plan stays in chat.
+- `test-driven-development`: tests first, then code.
+- `systematic-debugging`: find the cause before fixing.
+- `verification-before-completion`: run the check and show output before saying done.
+- `requesting-code-review` and `receiving-code-review`: review before merge, and verify feedback before applying it.
+- `using-git-worktrees`: isolate feature work.
+- `finishing-a-development-branch`: decide merge, PR, or cleanup when work is done.
+- `eval-harness`: prove claims about agent behavior with numbers (hooks survive /compact, notes reduce rereading).
+
+Origin: the workflow skills are copied from the superpowers set (MIT) and edited for this project: no design or plan files, no visual companion, no subagent skills. Keep this list in sync when a skill is added or removed.
 
 ## Source material
 
