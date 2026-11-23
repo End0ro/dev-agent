@@ -1,13 +1,13 @@
 ---
 name: eval-harness
-description: Use before building a feature that must be proven, not just finished. Define the pass/fail checks first, run them, and report numbers. Use for the memory helper's key claims, such as "notes reduce file rereading" and "hooks inject after /compact and /clear".
+description: Use before building a feature that must be proven, not just finished. Define the pass/fail checks first, run them, and report numbers. Use for claims about agent behavior, such as "this change reduces file rereading" or "this hook still fires after /compact".
 ---
 
 # Eval Harness
 
 Evals are the unit tests for claims about agent behavior. Write them before the code, run them after, and report numbers.
 
-Adapted from the eval-harness skill in `WorldFlowAI/everything-claude-code` (MIT), cut down to what this project needs.
+Adapted from the eval-harness skill in `WorldFlowAI/everything-claude-code` (MIT), cut down to what is needed here.
 
 ## When to use
 
@@ -40,21 +40,18 @@ Pass bar: <e.g. 3 of 3, or at least 2 of 3>
 - **pass^k:** all k tries succeed. Use for things that must be reliable, like hooks firing.
 - Name the numbers you used. "3/3 runs" is clearer than a percentage on small samples.
 
-## Evals for this project
+## Examples
 
-**1. Hooks survive /compact and /clear** (pass^3)
-- Check: ask "What is the secret word?" after /compact, then after /clear. Answer must contain MARKER-7431.
+**Context survives /compact and /clear** (pass^3)
+- Put a secret word in the injected context.
+- Check: ask "What is the secret word?" after /compact, then after /clear. The answer must contain the word.
 - Run by hand in a real Claude Code session. Say that in the report.
 
-**2. Notes reduce file rereading** (A/B)
-- Same task, same repo state, two arms: with notes injected, without.
+**Change reduces file rereading** (A/B)
+- Same task, same repo state, two arms: with the change, without.
 - Check: count Read/Grep/Glob tool calls on project files per run. Fewer is better.
 - Run each arm at least 3 times. One run proves nothing.
 - Also check the answer is still correct. Fewer reads with a wrong result is a failure.
-
-**3. Stale notes are not injected**
-- Edit a noted file, start a new session.
-- Check: the note for that file is absent from the injected context.
 
 ## Report template
 
