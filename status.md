@@ -4,27 +4,34 @@ Last updated: 2026-11-24.
 
 ## Current project: Stock Market Agent
 
-- Client repo: `End0ro/stock-marker-agent` (agent files only).
-- Full context, decisions and open questions: `docs/context.md` in that repo.
+- Client repo: `End0ro/stock-marker-agent` (agent files only). Branch `claude/gracious-faraday-78o3qr`, no PR yet.
+- Context, decisions and open questions: `docs/context.md` in that repo (not yet updated with the items below).
 - Development is driven from this repo (`dev-agent`).
 
-## Done in the session of Nov 23 to 24, 2026
+## Decisions
 
-- Read the project plan PDF and turned it into a design in chat.
-- Removed halal screening. The client handles it himself.
-- Read the TradingAgents repo: takes holdings as input, runs on past dates, supports many AI providers, but needs its own paid AI key and makes about 10+ AI calls per stock per run.
-- Designed alerts: price rules in plain code plus an AI step that labels only new headlines. Full analysis only for the digest, the weekly review, or after an urgent alert.
-- Chose news every 15 minutes around the clock, prices every 5 minutes during market hours.
-- Broker is Freedom (Tradernet). Found the `tradernet-sdk` package and a third-party Tradernet MCP server. Read-only keys not confirmed.
-- Decided to build the agent inside Claude Code with the official Telegram plugin and the Tradernet MCP server. Trading is blocked with deny rules (checked in the official permissions docs).
-- Decided to start on a made-up portfolio (KO, NVDA, AAPL, TSLA).
-- Created `stock-marker-agent` with `CLAUDE.md` (the agent's instructions) and `docs/context.md`.
-- Decided: Claude does the analysis with its own team of sub-agents (news, numbers, price, bull and bear, risk checker) built from TradingAgents' ideas. The TradingAgents program is not used.
-- Checked Anthropic's rules: a Claude subscription can't be plugged into a third-party program, and the agent should run on the client's own subscription.
+- The agent runs inside Claude Code, reports in Russian through the official Telegram plugin, and never trades. Trading tools are blocked with deny rules.
+- Broker is Freedom (Tradernet), read only. Starts on a made-up portfolio (KO, NVDA, AAPL, TSLA).
+- Analysis is done by our own sub-agent team (news, numbers, price, bull, bear, risk checker) built from TradingAgents' ideas. The TradingAgents program is not used.
+- Data: Finnhub for news, Yahoo for prices, SEC EDGAR for numbers. All cut off at an as-of date, so the same code works for backtests and live runs.
+- Halal screening is out. The client handles it.
+- The agent should run on the client's own Claude subscription.
+
+## Built and tested
+
+- Data tools (`python -m tools ...`), the team, and the `analyze-stock` skill. 97 unit tests pass.
+- NVDA backtest, Nov 1 to 12, 2026 (results in `backtest/results/summary.md`):
+  - Gate passed. `review` first fired on Nov 9, three days before the CEO resigned. Nov 1 to 8 were `watch`.
+  - Same-input check failed. Nov 5 gave `watch` the first time and `review` on a repeat. Cause: the news analyst rated the same story `medium` once and `high` once.
 
 ## Next step
 
-See "Next step" in `docs/context.md` of `stock-marker-agent`. In short:
-1. Ahmed answers: create a free Finnhub account for dated news (recommended), or skip the backtest.
-2. Design the sub-agent team from TradingAgents' role prompts. Get approval in chat.
-3. Design phase 1 (NVDA backtest), plan, build.
+1. Decide: fix the news analyst's severity rules, then re-run Nov 5 a few times (about $1.20 a run), or note it as a known problem and move on.
+2. Update `docs/context.md`.
+3. Final review of the branch, then open the PR.
+
+## Open questions
+
+- Tradernet read-only keys and tool names.
+- Client's watchlist, digest time, and whether stocks only.
+- Price for the client.
