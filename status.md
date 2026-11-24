@@ -19,9 +19,12 @@ Last updated: 2026-11-24.
 - Decided to build the agent inside Claude Code with the official Telegram plugin and the Tradernet MCP server. Trading is blocked with deny rules (checked in the official permissions docs).
 - Decided to start on a made-up portfolio (KO, NVDA, AAPL, TSLA).
 - Created `stock-marker-agent` with `CLAUDE.md` (the agent's instructions) and `docs/context.md`.
+- Decided: Claude does the analysis with its own team of sub-agents (news, numbers, price, bull and bear, risk checker) built from TradingAgents' ideas. The TradingAgents program is not used.
+- Checked Anthropic's rules: a Claude subscription can't be plugged into a third-party program, and the agent should run on the client's own subscription.
 
 ## Next step
 
-1. Answer the open question: Claude does the analysis itself with TradingAgents' roles rebuilt as skills (recommended), or TradingAgents with its own paid key.
-2. Design phase 1 (NVDA backtest, Nov 1 to 12) with the brainstorming skill.
-3. Write the plan, then build.
+See "Next step" in `docs/context.md` of `stock-marker-agent`. In short:
+1. Ahmed answers: create a free Finnhub account for dated news (recommended), or skip the backtest.
+2. Design the sub-agent team from TradingAgents' role prompts. Get approval in chat.
+3. Design phase 1 (NVDA backtest), plan, build.
