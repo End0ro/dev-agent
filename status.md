@@ -1,10 +1,10 @@
 # Status
 
-Last updated: 2026-11-24 (end of session).
+Last updated: 2026-11-24 (stage 0 done).
 
 ## Current project: Stock Market Agent
 
-- Client repo: `End0ro/stock-marker-agent` (agent files only). Branch `claude/gracious-faraday-78o3qr`. PR #1 is open: https://github.com/End0ro/stock-marker-agent/pull/1. No CI, no comments yet. Not merged.
+- Client repo: `End0ro/stock-marker-agent` (agent files only). PR #1 (the team, tools and NVDA backtest) and PR #2 (risk-checker JSON fix) are both merged into `main`. No CI in that repo.
 - Context, decisions and open questions: `docs/context.md` in that repo. It is up to date as of today.
 - Development is driven from this repo (`dev-agent`).
 
@@ -25,11 +25,11 @@ Last updated: 2026-11-24 (end of session).
 - NVDA backtest, Nov 1 to 12, 2026. Gate passed: `review` first fired on Nov 9, three days before the CEO resigned.
 - Severity fix: severity is now a fixed list in `news-analyst.md`. The news analyst also runs one plain tools command per Bash call (the permission rule does not match loops).
 - Nov 5 same-input check after the fix: the Warren story was `medium` in 4 of 4 valid runs. Verdicts: `watch` 3 times, `review` once. That `review` was a fallback: the risk-checker returned invalid JSON twice.
+- Risk-checker JSON fix is in `main` (PR #2). Replay of the saved Nov 5 inputs: 0 invalid JSON in 10 runs. Not proof: run 6's exact inputs were not saved, and the retry change was never exercised. 97 unit tests pass.
 - Final review of the branch done. No Critical issues. Findings are in `docs/context.md` under "Before going live".
 
 ## Open, not done
 
-- Risk-checker invalid JSON. Cause found (the long `reason` line loses its comma, same mistake on the retry). Fix proposed, not approved, not applied: put `reason` last, add a self-check line, and send the error back on retry. Details in `docs/context.md`.
 - Finnhub plan limits are not confirmed (their docs pages would not load for the fetch tool).
 - No deny rules for Tradernet order tools yet. Add them before connecting the broker.
 - Set a real `SEC_USER_AGENT` contact before live use.
@@ -44,7 +44,7 @@ Last updated: 2026-11-24 (end of session).
 
 Rule: one finish test per stage. If a test fails, say so and stop.
 
-- Stage 0, close the backtest. Fix the risk-checker JSON (two edits, need Ahmed's OK, see `docs/context.md`). Merge PR #1. Finish test: replay run 6's inputs through the risk-checker 10 times, report the failure count as it is.
+- Stage 0, close the backtest. DONE Nov 24. Fix merged (PR #2), PR #1 merged. Finish test: 0 failures in 10 replays, on the saved Nov 5 inputs (run 6's inputs were not saved).
 - Stage 1, Telegram sends on its own. Ahmed makes a bot with BotFather, we install the official Telegram plugin on his computer. Finish test: a message from the agent reaches Telegram at a set time with no message from him first, 3 times in a row. If it fails, stop and choose a fallback before building more.
 - Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Russian report per stock, one digest message, in Telegram. Finish test: 5 days in a row with no wrong numbers and the report check passing every time. Use a placeholder digest time until the client answers.
 - Stage 3, weekly review with 2 to 3 candidates. Finish test (proposed, none in the context file): one review where every candidate has sources and nothing says "buy now".
@@ -57,9 +57,8 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 
 ## Next step
 
-1. Start a new session. Ahmed plans to finish stage 0 there and merge. Merging needs his own ask in that session. Open PRs: `End0ro/stock-marker-agent` #1 and `End0ro/dev-agent` #5 (this file).
-2. Note for that session: `status.md` on `main` is old until PR #5 is merged. Read it from branch `claude/relaxed-pasteur-b2il2h` first, or merge #5 first.
-3. Then stage 1: break it into small tasks (bot setup, plugin install, scheduled send, the 3-in-a-row test).
+1. Stage 1, Telegram sends on its own. Ahmed has not made a bot yet. First task: he makes one with BotFather (on his phone, in Telegram).
+2. Then break stage 1 into small tasks (bot setup, plugin install on his computer, scheduled send, the 3-in-a-row test), with the brainstorming, plan, tests-first flow.
 
 ## Open questions
 
