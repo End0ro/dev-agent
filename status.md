@@ -17,6 +17,7 @@ Last updated: 2026-11-24 (end of session).
 - Halal screening is out. The client handles it.
 - The agent should run on the client's own Claude subscription.
 - Ahmed decided not to re-run Nov 1 to 12 with the new severity rule (about $10). Those results use the old rule.
+- Plan agreed (below): each stage has one finish test, and we do not start the next stage until it passes. The agent runs on Ahmed's own computer for stages 1 to 5. The Telegram test comes first, because it is the biggest unknown.
 
 ## Built and tested
 
@@ -39,9 +40,26 @@ Last updated: 2026-11-24 (end of session).
 - In the cloud container the Finnhub key is injected by the proxy. On a normal machine, set `FINNHUB_API_KEY`.
 - A run costs about $0.45 to $1.06 and takes 30 to 65 seconds.
 
+## Plan (agreed Nov 24)
+
+Rule: one finish test per stage. If a test fails, say so and stop.
+
+- Stage 0, close the backtest. Fix the risk-checker JSON (two edits, need Ahmed's OK, see `docs/context.md`). Merge PR #1. Finish test: replay run 6's inputs through the risk-checker 10 times, report the failure count as it is.
+- Stage 1, Telegram sends on its own. Ahmed makes a bot with BotFather, we install the official Telegram plugin on his computer. Finish test: a message from the agent reaches Telegram at a set time with no message from him first, 3 times in a row. If it fails, stop and choose a fallback before building more.
+- Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Russian report per stock, one digest message, in Telegram. Finish test: 5 days in a row with no wrong numbers and the report check passing every time. Use a placeholder digest time until the client answers.
+- Stage 3, weekly review with 2 to 3 candidates. Finish test (proposed, none in the context file): one review where every candidate has sources and nothing says "buy now".
+- Stage 4, urgent alerts. Finish test: alerts are rare enough that he reads them. Also test the 30-minute delay and messages sent on their own.
+- Stage 5, Q&A in Telegram. Finish test: every answer cites sources.
+- Stage 6, two-week test with the client. Needs: his watchlist, digest time, price, and whose Claude subscription runs it. The client's setup is decided here.
+- Stage 7, his real Freedom account, read only, then live. Needs his Tradernet read-only keys. First step: add deny rules for order tools, before the first connection.
+
+Only stage 0 and stage 1 are broken into small tasks so far. Break down each later stage when we reach it, with the same brainstorming, plan, tests-first flow.
+
 ## Next step
 
-- Ahmed wants to change something in the direction of the project. Ask what, before doing anything else.
+1. Start a new session. Ahmed plans to finish stage 0 there and merge. Merging needs his own ask in that session. Open PRs: `End0ro/stock-marker-agent` #1 and `End0ro/dev-agent` #5 (this file).
+2. Note for that session: `status.md` on `main` is old until PR #5 is merged. Read it from branch `claude/relaxed-pasteur-b2il2h` first, or merge #5 first.
+3. Then stage 1: break it into small tasks (bot setup, plugin install, scheduled send, the 3-in-a-row test).
 
 ## Open questions
 
