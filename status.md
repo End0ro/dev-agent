@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-25, evening (stage 2 built; save-result, the holiday message and the daily records merged into the client repo `main`; the memory test passed; the stage 2 test was shortened to 2 normal-day runs: run 1 done Nov 25 by hand (digest arrived, record saved in the cloud), run 2 is the Nov 27 timer; layout waits on the client; next session designs Q&A in Telegram).
+Last updated: 2026-11-25, late evening (stage 2 built, run 1 done, run 2 is the Nov 27 timer. Plan changed the same evening: urgent-first reports twice a day come before Q&A, and the dashboard is built last. See "Plan" below. Stage 4a is built and reviewed on the client repo branch `claude/bold-pasteur-ri8b6u` (8 commits, 270 tests pass, pushed, PR #20 open, not merged).)
 
 ## Current project: Stock Market Agent
 
@@ -30,6 +30,18 @@ Last updated: 2026-11-25, evening (stage 2 built; save-result, the holiday messa
 - Ahmed decided Nov 25: Q&A in Telegram (stage 5, official plugin) is designed next, before stages 3 and 4, because the client wants to ask questions. The stage 2 test runs in the background, so building does not wait for it.
 - Ahmed decided Nov 25: the stage 2 finish test is shortened from 5 days to 2 normal market days in a row, because he cannot wait until the end of the week. Run 1: Ahmed presses Run now on the `Daily digest` routine on Nov 25. Run 2: the timer on Fri Nov 27 (Nov 26 is Thanksgiving, a closed-day message that does not count). Pass: no wrong numbers, the report check passes both times, run 1 saves a record and run 2 compares against it. Trade-off: two runs prove the cloud path works but say less about day-to-day stability than five.
 - Ahmed decided Nov 25: when the US market is closed, the agent still tracks the news and sends a message that the market is closed, with the reason. Built and merged the same day (see below). Weekends stay silent.
+
+## Decisions, Nov 25 late evening (new reports)
+
+- Two reports a day, Monday to Friday, all in Moscow time. 11:00 is the full report ("Утренний отчет"). 20:00 is a short "what changed since 11:00" report ("Вечерний отчет" is my proposed title, Ahmed has not objected).
+- Urgent news go inside the reports. No real-time watcher for now (the client asked for it this way). The watcher research (Cloudflare Workers, a small server, the `/fire` endpoint, a Haiku headline filter, one or two publishers) is parked, not thrown away.
+- Each report starts with an urgent section: a price alert (warning: down 5% in a day; urgent: down 10% in a day or 15% from the 20-day high) and new high-severity news. Each item says what happened, how serious it is, the risk in plain words, and the options. Never "buy now" or "sell now". Ahmed: "explain the risks".
+- 20:00 report: only the news and price check per stock. Full analysis (bull, bear, risk checker) runs only for a stock with a high-severity item or an alert crossing. A quiet day is two lines. The price is labeled "price at 20:00, market open".
+- US holidays: one closed-day message at 11:00 with the news and the last close price. Nothing at 20:00. Weekends stay silent.
+- Report rules: Russian only, except stock tickers. "Remove brackets" means only the English word in brackets in the verdict line ("наблюдать (watch)" becomes "наблюдать"). Ahmed confirmed Nov 25. The `[n]` source tags stay, because the report checker needs a source marker on every line with a number. "Утренний отчет" replaces "Утренний дайджест".
+- Dashboard: the report becomes an interactive dashboard, built last, together with Ahmed. Telegram will then send only "report is ready" plus the link. Until the dashboard exists, Telegram keeps the full text. Open: the ready message may need an urgent flag word, because urgent items would only be visible in the dashboard.
+- Dashboard hosting test, Nov 25: a Claude artifact. A scheduled cloud run with nobody in the chat updated its data file by itself (run 3, 14 seconds, status succeeded). Test page: https://claude.ai/artifact/2gfofrJUtUDgjBypRUooZE (private, only Ahmed can open it). Not tested: a real report run doing it, sharing with the client, and how the page looks on a phone. Cloudflare Pages was researched and is the fallback if the artifact fails. A public page link must be solved before the real portfolio.
+- Do not merge new report work into the client repo `main`, and do not touch the `Daily digest` routine, until the Nov 27 run is checked. The routine reads `main`.
 
 ## Built and tested
 
@@ -88,25 +100,50 @@ Rule: one finish test per stage. If a test fails, say so and stop.
 - Stage 0, close the backtest. DONE Nov 24. Fix merged (PR #2), PR #1 merged. Finish test: 0 failures in 10 replays, on the saved Nov 5 inputs (run 6's inputs were not saved).
 - Stage 1, Telegram sends on its own. DONE Nov 25. Finish test (changed by Ahmed to 2 messages): 2 cloud scheduled tasks, 5 minutes apart, both fired by themselves, both messages arrived. Built with the `send-telegram` command plus Claude cloud scheduled tasks, not the plugin.
 - Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Russian report per stock, one digest message, in Telegram. Finish test (shortened by Ahmed Nov 25 from 5 days): 2 normal market days in a row, no wrong numbers, the report check passing both times, and the second run comparing against the record of the first. Use a placeholder digest time until the client answers.
-- Stage 3, weekly review with 2 to 3 candidates. Finish test (proposed, none in the context file): one review where every candidate has sources and nothing says "buy now".
-- Stage 4, urgent alerts. Finish test: alerts are rare enough that he reads them. Also test the 30-minute delay and messages sent on their own.
-- Stage 5, Q&A in Telegram. NEXT (moved ahead of stages 3 and 4 by Ahmed, Nov 25). Finish test: every answer cites sources.
-- Stage 6, two-week test with the client. Needs: his watchlist, digest time, price, and whose Claude subscription runs it. The client's setup is decided here.
-- Stage 7, his real Freedom account, read only, then live. Needs his Tradernet read-only keys. First step: add deny rules for order tools, before the first connection.
+- Stage 3, weekly review with 2 to 3 candidates. Finish test (proposed, none in the context file): one review where every candidate has sources and nothing says "buy now". Order of work: after stage 5.
+- Stage 4, urgent-first reports (changed Nov 25, replaces "urgent alerts"). NEXT. Backend only, no dashboard. Four plans, each built on a branch with tests first:
+  - 4a, urgent section. BUILT Nov 25 (not pushed, no PR, not merged). Price alert level (warning/urgent), new high-severity news, no repeats of news already sent, last close price in the holiday message. Report text rules: Russian only except tickers, no English word in brackets in the verdict line, `[n]` source tags stay, title "Утренний отчет". The run also writes the report as a data file (JSON) for the future dashboard. A scratch prototype of the old version passed 259 tests, but its layout changes under the new rules, so it is a reference only.
+  - 4b, Russian risk text and options per urgent item, plus a code check that rejects English words except tickers. Decided by Ahmed Nov 25: the analyst agents write the Russian text themselves (no separate translation step), and the code check enforces it.
+  - 4c, the 20:00 short report and a second record per day (morning and evening slots in `records/`), with "no repeats" working across both reports. Quiet day is two lines. Holidays send nothing at 20:00. Also fix a known limit from 4a: news sent in a holiday message comes back as urgent on the next trading day, because holidays write no record (Thanksgiving Nov 26 then Nov 27 is the first case). Other known limits from the 4a review: news hidden by the per-stock limit counts as seen the next day; the urgent price line has no date; a price alert repeats every day while a stock stays 15% below its 20-day high.
+  - 4d, schedule switch: 11:00 and 20:00 Moscow time, Monday to Friday. Only after the Nov 27 run is checked and 4a to 4c are merged. Changes the `Daily digest` routine and adds a second routine.
+  - Finish test for stage 4 (proposed, Ahmed has not seen it): (1) replay the saved NVDA inputs for Nov 11 and Nov 12: NVDA is first in the urgent section with an alert or news item, a risk line and options, and the report check passes; (2) a second run the same day shows no repeated news; (3) a quiet 20:00 run is two lines; (4) the holiday message has news and last close price; (5) a scan of all report text finds no English words except tickers.
+- Stage 5, Q&A in Telegram. After stage 4. Scope still open: A) questions about the 4 stocks, B) any stock on demand, C) general market questions come back in later. Finish test: every answer cites sources. Needs a session that stays open (Ahmed's computer for now).
+- Stage 5b, the dashboard (new, Nov 25). Last build step, before the client test. Built together with Ahmed. Reads the data file each report writes. Hosting: Claude artifact (test passed), fallback Cloudflare Pages. Then Telegram switches to "ready plus link". Finish test (proposed): after a real report run, the dashboard shows the new data on Ahmed's phone with no manual step.
+- Stage 6, two-week test with the client. Needs: his watchlist, price, and whose Claude subscription runs it. The client's setup is decided here. The digest time is now decided (11:00 and 20:00 Moscow).
+- Stage 7, his real Freedom account, read only, then live. Needs his Tradernet read-only keys. First step: add deny rules for order tools, before the first connection. Also solve who can open the dashboard link.
 
-Only stage 0 and stage 1 are broken into small tasks so far. Break down each later stage when we reach it, with the same brainstorming, plan, tests-first flow.
+Order of work: stage 2 test (Nov 27), stage 4 (4a, 4b, 4c, then 4d), stage 5, stage 3, stage 5b, stage 6, stage 7. Only stage 0 and stage 1 were broken into small tasks before; stage 4 is split above, and each part gets its task list when we start it, with the same brainstorming, plan, tests-first flow.
 
 ## Next step
 
-### Start here in a fresh session: Q&A in Telegram (stage 5)
+### Start here in a fresh session: stage 4b (Ahmed answers the open question there)
 
-Why: the client wants to ask questions in the Telegram chat, not only read the digest. Ahmed moved this ahead of stages 3 and 4 (Nov 25).
+Open question for 4b, Ahmed takes it to the new session: who writes the risk line and the options for each urgent item. My proposal: the `risk-checker` agent (2 to 3 options per stock with an urgent item). Alternative: a small new agent, one extra run per urgent stock. Publisher filter for news: decided "later" (Nov 25), all publishers stay.
+
+Ahmed also takes the stage 5 (Q&A in Telegram) questions to a new session.
+
+Background on 4a:
+
+Stage 4a is built (client repo branch `claude/bold-pasteur-ri8b6u`, 8 commits on top of `main` at 0796d88, 270 tests pass, built with subagents, each task reviewed, plus a whole-branch review and one fix commit). It was pushed Nov 25 after Ahmed allowed it (the first tries were blocked by the permission check). PR #20 is open in the client repo, not merged: wait for the Nov 27 run check.
+
+What 4a changed (all in the client repo):
+- `tools/alerts.py` (new): alert level from day move and drop from the 20-day high.
+- `tools/records.py`: `seen_urls`, `since_date` (ignores a bad record date).
+- `tools/digest.py`: title "Утренний отчет на DATE", verdict without the English word, news lines use `headline_ru` (fallback text when missing), urgent section first ("Срочное:", max 4 items, or "Срочного нет."), no repeats inside one report, corrupt stocks do not use up slots.
+- `tools/closed_day.py` and `tools/__main__.py`: holiday message shows last close prices; `build-digest --records-dir records`.
+- `daily-digest` skill: `records-pull` before the analysis (step 1c) and `--records-dir records` in step 3. `analyze-stock` skill: verdict line has no English word.
+- Dry run on the saved NVDA results for Nov 12: NVDA first in the urgent section with the price alert and news lines. The news lines show the fallback text because the old files have no `headline_ru`.
+- Not proven in a cloud run. The routine reads `main`, so nothing runs it until the PR is merged after the Nov 27 check.
 
 Steps:
-1. Read the official Claude Code channels docs (code.claude.com/docs) and say which page each claim comes from. Do not answer from memory.
-2. Known problem: the plugin needs a Claude Code session that stays open. A scheduled cloud run starts, finishes and closes. Ahmed's computer sleeps and he has no server. Plan: try it on Ahmed's computer while it is awake. Where it lives for the real client stays a stage 6 decision.
-3. Use the brainstorming skill. Design in chat, one question at a time. No design files in git.
-4. Finish test (agreed earlier): every answer cites sources. Hard rules still apply: no "buy now" or "sell now", no number without a source, never an order.
+1. PR #20 is open ("Stage 4a: urgent section in the report"). Do not merge before the Nov 27 run is checked.
+2. Then stage 4b (risk text and options per urgent item, English-word check). Stack it on the 4a branch or wait for the merge. Use the writing-plans skill, plan in chat, then ask subagents or inline.
+3. Tests first. Hard rules still apply: no "buy now" or "sell now", no number without a source, never an order.
+
+Later, stage 5 (Q&A in Telegram), when we get there:
+- Read the official Claude Code channels docs (code.claude.com/docs) and say which page each claim comes from. Do not answer from memory.
+- Known problem: the plugin needs a Claude Code session that stays open. A scheduled cloud run starts, finishes and closes. Ahmed's computer sleeps and he has no server. Try it on Ahmed's computer while it is awake. Where it lives for the real client stays a stage 6 decision.
+- Brainstorm in chat, one question at a time. Finish test: every answer cites sources.
 
 Run 1 of the stage 2 test, Nov 25 (Ahmed pressed Run now, about 14:30 UTC): the first try failed at `market-status` (`No module named 'requests'`, nothing sent, nothing written, and it sent a phone notification nobody asked for). The setup script on "Stock Market Agent" had not installed it, and we do not know why (the script text could not be read from here). Fix: client repo PR #18 (step 0 of the `daily-digest` skill installs `requests` from `requirements.txt` if missing, and no phone notifications). Second try: the digest arrived (Ahmed said so, he did not send the text or the last line of the run). Checked from the branch: `claude/records` exists with `records/2026-11-25.json` (4 stocks: KO watch, NVDA review, AAPL watch, TSLA watch), and `main` did not move. So the cloud push to a missing branch worked, including the orphan-branch path.
 
