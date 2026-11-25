@@ -1,11 +1,11 @@
 # Status
 
-Last updated: 2026-11-25 (stage 2 built and merged, daily cloud task created, first real digest sent; layout change and 5-day test still to do).
+Last updated: 2026-11-25 (stage 2 built; save-result and the holiday message merged into the client repo `main`; the 5-day test has not started; layout waits on the client).
 
 ## Current project: Stock Market Agent
 
-- Client repo: `End0ro/stock-marker-agent` (agent files only). PR #1 (the team, tools and NVDA backtest) and PR #2 (risk-checker JSON fix) are both merged into `main`. No CI in that repo.
-- Context, decisions and open questions: `docs/context.md` in that repo. It is up to date as of today.
+- Client repo: `End0ro/stock-marker-agent` (agent files only). Merged into `main`: PR #1 and #2 (the team, tools, backtest, risk-checker fix), #4 to #9 (Telegram send, stage 2 digest and skill), #11 `save-result` and #12 the holiday message (#12 included #11). No CI in that repo. 191 tests pass.
+- Context, decisions and open questions: `docs/context.md` in that repo (updated Nov 25 in a docs PR). This file is the short handoff.
 - Development is driven from this repo (`dev-agent`).
 
 ## Decisions
@@ -27,7 +27,7 @@ Last updated: 2026-11-25 (stage 2 built and merged, daily cloud task created, fi
 - Telegram token and chat ID are plain environment variables (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) on the cloud environment "Stock Market Agent". Anyone who uses that environment can read them. Reason: cloud network secrets only add headers, and Telegram wants the token in the URL. `api.telegram.org` is added to that environment's allowed hosts. Ahmed typed the values himself, never in chat.
 - Ahmed decided Nov 25: everything the client reads is in Russian, headlines included. Where the Russian text comes from is still open.
 - Ahmed decided Nov 25: while we build, Ahmed pays for the runs. Whose subscription pays after that is a stage 6 question.
-- Ahmed decided Nov 25: when the US market is closed, the agent still tracks the news and sends a message that the market is closed, with the reason. Design not done yet (brainstorming comes first). Nov 26 (Thanksgiving) comes before it is built, so that run will send a normal digest with the previous close.
+- Ahmed decided Nov 25: when the US market is closed, the agent still tracks the news and sends a message that the market is closed, with the reason. Built and merged the same day (see below). Weekends stay silent.
 
 ## Built and tested
 
@@ -46,27 +46,27 @@ Last updated: 2026-11-25 (stage 2 built and merged, daily cloud task created, fi
   - Skill `daily-digest`: stops on Saturday and Sunday, runs `analyze-stock` for KO, NVDA, AAPL, TSLA, builds the digest, sends it. If the build fails it sends a short notice.
 - Repo in a cloud task: a task made with the task tool gets no repo, and `git clone` inside a task fails (private repo, no GitHub login). A task made in claude.ai/code/routines with the repo attached does get it. Ahmed made it: name `Daily digest`, `CRON_TZ=Europe/Moscow 50 6 * * 1-5`, repo `End0ro/stock-marker-agent`, environment "Stock Market Agent", connectors removed.
 - First real run, Nov 25, 09:44 UTC ("Run now"): about 12 minutes, about $3.58 at list price. The digest arrived in Telegram. Verdicts: KO watch, NVDA review, AAPL watch, TSLA watch. All four report checks passed. NVDA numbers match the run's own report. Not yet checked against the sources by hand. The task list shows "succeeded" as soon as the run starts, so it does not mean the run is done.
+- Closed-day message, Nov 25 (client repo PR #12, merged): holiday list in code (2026 and 2027), `market-status` and `build-closed-digest` commands, `news-analyst` got `DAYS` (default 7) and `headline_ru`, `daily-digest` skill branches on a holiday. On a holiday only the news is read (2 days), the message is built by code, and a short notice goes out if anything fails. Built with subagents, each task reviewed, plus a final review and fixes. 191 tests pass. Holiday dates match NYSE announcements as seen in search results; the nyse.com page could not be opened. Not tried in a cloud run: first real use is Nov 26 (Thanksgiving). Fallback notice has no closing disclaimer (a status line). Holiday list needs a refresh before 2028.
 - Problems from that run:
   - `requests` was not installed in the cloud container. The run installed it itself, and that is lost after each run. Fix added Nov 25 (not proven yet): setup script on the "Stock Market Agent" environment. It runs `pip install -r` on every `requirements.txt` it finds at the top of the checkout or one folder down, and does nothing if there is none. Proof comes from the next fresh run: check that it did not install `requests` by itself.
-  - The run rebuilt the result JSON files by hand and shortened some fields (the bear's `answers_to_bull` is a placeholder in NVDA, AAPL, TSLA). Cause found Nov 25 (read from the TSLA part of the run, the last 33 events only): `analyze-stock` step 8 says "write the result JSON", but no command does it. The main agent typed the whole file by hand in a Python heredoc, at the end of a long four-stock run. It shortened the bull and bear claims, wrote `answers_to_bull` as the text "(...abridged here)" instead of a list, and typed `report_check` itself (copied from the skill's example). `check-report` did run. No code checks the shape of the result file, so nothing stopped it. Not yet checked for NVDA, AAPL, KO. Fix built Nov 25 (client repo PR #11, not merged yet): `python -m tools save-result` builds the file from the six role outputs, runs the report check itself and rejects bad shapes (exit 1, no file). Step 8 of the skill calls it. 160 tests pass. All 13 old NVDA result files rebuild identically. Not tried in a cloud run yet. Limit: text shortened inside a valid shape is not caught.
+  - The run rebuilt the result JSON files by hand and shortened some fields (the bear's `answers_to_bull` is a placeholder in NVDA, AAPL, TSLA). Cause found Nov 25 (read from the TSLA part of the run, the last 33 events only): `analyze-stock` step 8 says "write the result JSON", but no command does it. The main agent typed the whole file by hand in a Python heredoc, at the end of a long four-stock run. It shortened the bull and bear claims, wrote `answers_to_bull` as the text "(...abridged here)" instead of a list, and typed `report_check` itself (copied from the skill's example). `check-report` did run. No code checks the shape of the result file, so nothing stopped it. Not yet checked for NVDA, AAPL, KO. Fix built and merged Nov 25 (client repo PR #11, in `main` with #12): `python -m tools save-result` builds the file from the six role outputs, runs the report check itself and rejects bad shapes (exit 1, no file). Step 8 of the skill calls it. 160 tests pass. All 13 old NVDA result files rebuild identically. Not tried in a cloud run yet (first run with it: Nov 27, since Nov 26 is a holiday). Limit: text shortened inside a valid shape is not caught.
   - The run sent itself a phone notification nobody asked for. The Stop hook asked it to commit and push and it correctly declined.
 - Ahmed's feedback on the digest: too much in it, poorly structured, hard for the client to read. Main faults: the stock that needs attention is not first, no reason shown, English headlines in a Russian message, `[n]` tags on every line, repeated "серьёзно", verdict in two languages. Proposed layout (not built): attention first with a short reason, then one line per calm stock. Waiting for the client's answer.
 
 ## Open, not done
 
-- Stage 2 is not finished. The 5-day finish test has not started. If the task keeps running, days 1 to 5 are Nov 26, 27, 30 and Dec 1, 2. Nov 26 is US Thanksgiving (market closed), so the digest will show the previous close. Ahmed may not want to count that day.
+- Stage 2 is not finished. The 5-day finish test has not started. Nov 26 is US Thanksgiving and sends the closed-day message, which has no price numbers. Proposed: do not count it, so days 1 to 5 are Nov 27, 30 and Dec 1, 2, 3. Ahmed decides.
 - Client questions (Ahmed asks): digest time, layout, headlines in Russian or not.
-- Merge client repo PR #11 (`save-result`) with Ahmed's yes, then check the next cloud run used it (result file has the real `report_check`, `answers_to_bull` is a list).
-- Rebuild the digest layout after the client answers. Add US holiday handling and the price alert level (NVDA was 27,86% below its 20-day high on Nov 25).
+- Rebuild the digest layout after the client answers. Add the price alert level (NVDA was 27,86% below its 20-day high on Nov 25).
 - Check the digest numbers against their sources by hand. TSLA done Nov 25: the tools output (price, numbers, P/E) matches the hand-typed result file on every number. That is tools against file, not against the Yahoo page or the SEC filing, and the news side is not checked. NVDA, AAPL, KO not checked.
 - Where Russian text for the reason line and headlines comes from (model translation checked by the report check, or lines from the Russian report).
 - No "changed from yesterday" in the digest: cloud sessions start empty.
-- Records idea (Ahmed, Nov 25): keep each day's result files so the next run can read yesterday. It would give: verdict changes with a reason, "new today" vs repeated news, and later a check of verdicts against what the price did next. How: the run saves its files to a branch of the client repo and the next run reads them. First step: a cheap test that a cloud run can push at all (not tested; the task prompt says not to push). Not built. Comes after the closed-day message. Changing the digest during the 5-day test may restart the count: Ahmed decides.
+- Records idea (Ahmed, Nov 25): keep each day's result files so the next run can read yesterday. It would give: verdict changes with a reason, "new today" vs repeated news, and later a check of verdicts against what the price did next. How: the run saves its files to a branch of the client repo and the next run reads them. First step: a cheap test that a cloud run can push at all (not tested; the task prompt says not to push). Not built. Comes after the 5-day test. Changing the digest during the 5-day test may restart the count: Ahmed decides.
 - Instagram idea (Ahmed, Nov 25): one Claude prompt plus Airtable gives a Magnificent 7 table with a 0 to 10 score and buy/hold/sell. Not for us as is: it breaks our rules (no buy/sell calls, no number without a source) and has no checks, no timer, no Telegram. Two parts worth keeping: a table of all stocks and history (a possible home for the records idea; Airtable from a cloud run is untested and its AI billing is unknown), and market sentiment as a labelled extra with a source, later.
-- Closed-day message BUILT Nov 25 (client repo PR #12, not merged; it includes PR #11 `save-result`, so Ahmed merges only #12). Holiday list in code (2026 and 2027, matches NYSE announcements via search, nyse.com page itself not opened). On a holiday the daily run reads news only (2 days), the message is built by code with a Russian headline from the analyst, and a short notice is sent if anything fails. Weekends stay silent. Fallback notice has no closing disclaimer (a status line, not a report). 191 tests pass. Not tried in a cloud run: first real use is the Nov 26 run. Must be merged before 06:50 Moscow time on Nov 26. Holiday list needs a refresh each year.
 - Cost: about $3.58 a run is about $75 over 21 weekdays at list price (my estimate). Ahmed pays while building. Whose subscription pays after that is still open.
 - The token is a plain environment variable, not a network secret. Fine for Ahmed alone, revisit for the client.
 - Finnhub plan limits are not confirmed (their docs pages would not load for the fetch tool).
+- Small leftovers from the reviews (details in `docs/context.md`, "Not done in stage 2"): no notification rule in the `daily-digest` skill; an unwritable `--out` gives a traceback in `build-digest` and `build-closed-digest`; some `save-result` checks are loose (null date, value types).
 - No deny rules for Tradernet order tools yet. Add them before connecting the broker.
 - Set a real `SEC_USER_AGENT` contact before live use.
 
@@ -93,11 +93,17 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 
 ## Next step
 
-1. Ahmed asks the client for the digest time and layout.
-2. Setup script is added. Confirm on the Nov 26 run that `requests` was already there.
-3. Ahmed merges client repo PR #11 (`save-result`). Then watch the Nov 26 run: the result files should have a list in `answers_to_bull` and no placeholder text.
-4. Rebuild the layout after the client answers, add holiday handling and the price alert level, check the numbers by hand.
-5. Watch each daily run from Nov 26. Tell Ahmed if a number looks wrong. The 5-day test needs 5 runs in a row with no wrong numbers.
+Waiting on the client (Ahmed asks): digest time, layout, Russian or English headlines in the normal digest.
+
+Not waiting on anyone:
+
+1. Nov 26 run (Thanksgiving, 06:50 Moscow): check that the closed-day message arrived and reads well, that `requests` was already installed (setup script), and measure what a closed-day run costs. Nov 27 run: check the first run with `save-result` (list in `answers_to_bull`, no placeholder text, real `report_check`).
+2. Tiny fix: tell the `daily-digest` skill not to send phone notifications.
+3. Check NVDA, AAPL, KO numbers and the news side against their sources by hand.
+4. Find where the $3,58 per run goes, split by role, from the Nov 25 run transcript.
+5. Check Finnhub's real limits with a real call and its rate-limit headers.
+6. Ahmed decides whether Nov 26 counts in the 5-day test (proposed: no).
+7. After the 5-day test: the records idea (first a cheap test of whether a cloud run can push), then stage 3.
 
 ## Open questions
 
