@@ -25,6 +25,9 @@ Last updated: 2026-11-25 (stage 2 built and merged, daily cloud task created, fi
 - Ahmed's computer is not an always-on home (it sleeps). He has no server now. Where the always-on chat session lives is a stage 6 decision with the client.
 - Ahmed lowered the stage 1 finish test from 3 messages to 2, 5 minutes apart. Recurring (daily) runs are not proven yet. Stage 2 (5 days in a row) covers that.
 - Telegram token and chat ID are plain environment variables (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) on the cloud environment "Stock Market Agent". Anyone who uses that environment can read them. Reason: cloud network secrets only add headers, and Telegram wants the token in the URL. `api.telegram.org` is added to that environment's allowed hosts. Ahmed typed the values himself, never in chat.
+- Ahmed decided Nov 25: everything the client reads is in Russian, headlines included. Where the Russian text comes from is still open.
+- Ahmed decided Nov 25: while we build, Ahmed pays for the runs. Whose subscription pays after that is a stage 6 question.
+- Ahmed decided Nov 25: when the US market is closed, the agent still tracks the news and sends a message that the market is closed, with the reason. Design not done yet (brainstorming comes first). Nov 26 (Thanksgiving) comes before it is built, so that run will send a normal digest with the previous close.
 
 ## Built and tested
 
@@ -55,10 +58,10 @@ Last updated: 2026-11-25 (stage 2 built and merged, daily cloud task created, fi
 - Client questions (Ahmed asks): digest time, layout, headlines in Russian or not.
 - Merge client repo PR #11 (`save-result`) with Ahmed's yes, then check the next cloud run used it (result file has the real `report_check`, `answers_to_bull` is a list).
 - Rebuild the digest layout after the client answers. Add US holiday handling and the price alert level (NVDA was 27,86% below its 20-day high on Nov 25).
-- Check the digest numbers against their sources by hand.
+- Check the digest numbers against their sources by hand. TSLA done Nov 25: the tools output (price, numbers, P/E) matches the hand-typed result file on every number. That is tools against file, not against the Yahoo page or the SEC filing, and the news side is not checked. NVDA, AAPL, KO not checked.
 - Where Russian text for the reason line and headlines comes from (model translation checked by the report check, or lines from the Russian report).
 - No "changed from yesterday" in the digest: cloud sessions start empty.
-- Cost: about $3.58 a run is about $75 over 21 weekdays at list price (my estimate). Whose Claude subscription pays is still open.
+- Cost: about $3.58 a run is about $75 over 21 weekdays at list price (my estimate). Ahmed pays while building. Whose subscription pays after that is still open.
 - The token is a plain environment variable, not a network secret. Fine for Ahmed alone, revisit for the client.
 - Finnhub plan limits are not confirmed (their docs pages would not load for the fetch tool).
 - No deny rules for Tradernet order tools yet. Add them before connecting the broker.
