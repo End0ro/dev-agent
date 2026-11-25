@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-25 (stage 1 done).
+Last updated: 2026-11-25 (stage 2 code done locally, blocked on the cloud repo and a push).
 
 ## Current project: Stock Market Agent
 
@@ -37,7 +37,16 @@ Last updated: 2026-11-25 (stage 1 done).
 - `python -m tools send-telegram --text "..."` in the client repo (PR #4 and #5 merged). 107 unit tests pass. The token is hidden in all error text. Real check with a fake token: Telegram answered 401, exit 1, no token in the output.
 - Stage 1 test, Nov 25: two one-time cloud scheduled tasks set for 11:13 and 11:18 Ahmed's time. Both fired by themselves (1 min 40 s and 17 s late), both reported `sent: True`, no permission denials, and Ahmed confirmed the messages arrived. Each task ran a plain Python snippet with only the standard library, not the repo command. Cost per run was about $0.05 to $0.07 (list price).
 
+- Stage 2 code, Nov 25 (client repo, local branch `stage-2-digest`, 5 commits, NOT pushed, push access was denied). Built with subagents, each task reviewed, plus a final review and fixes. 141 tests pass (107 before).
+  - `python -m tools send-telegram --file PATH` (new option).
+  - `python -m tools build-digest TICKERS --as-of DATE --out PATH`: short Russian digest from the `analyze-stock` result files. Per stock: verdict, price with day move, top 2 news with links. Checked by the same report checker plus a 4096 length check. Writes the file only if the check passes. Exit 2 on a bad date or a missing results folder.
+  - Real check on NVDA 2026-11-12: output correct, every number sourced.
+  - Not in the digest yet: the price alert level (NVDA was 25% below its 20-day high that day, the digest shows only the day move), earnings and dividend dates, a Russian reason line.
+- Repo check in a cloud scheduled task, Nov 25 09:06 UTC: the task did NOT get the repo. Working folder was empty. The environment lists the repo, but a task only gets a repo if one is attached to the task, and the task tool has no field for that. The Telegram variables were there, and the fallback message arrived (cost about $0.07).
+
 ## Open, not done
+
+- Stage 2 is blocked on two things. (1) A cloud task must get the repo: test a `git clone` inside the task, or Ahmed creates the daily task in claude.ai with the repo attached. (2) The branch must be pushed, which needs write access to the client repo.
 
 - The scheduled tasks use a Claude session per message. Check that this is acceptable for the daily digest, and whose subscription it runs on.
 - A scheduled task did not need the repo for this test. Stage 2 needs the repo (tools, agents). Check that a fresh cloud session can get it.
@@ -70,7 +79,8 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 
 ## Next step
 
-1. Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Brainstorm first. Ahmed's goal: the client gets the report before the US market opens. The time comes from the client, use a placeholder until then. First question to settle: can a fresh cloud scheduled task get the repo and run `analyze-stock`?
+1. Stage 2, daily digest. Design agreed (short digest, no dates line, no Airtable, no extra data provider). Code is done locally. Next: get the repo into a cloud task (see Open), get write access and push `stage-2-digest`, add the `daily-digest` skill, run one real digest from the cloud, then set the timer (Monday to Friday, 06:50 Ahmed's time). The 5-day finish test cannot be done in one day.
+2. The plan and the local `stage-2-digest` branch live only in this session's container. They are lost if it is reclaimed before the branch is pushed. Remaining plan steps: the cloud repo check follow-up, the `daily-digest` skill, one real run, the timer, notes.
 
 ## Open questions
 
