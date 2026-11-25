@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-25, evening (stage 2 built; save-result, the holiday message and the daily records merged into the client repo `main`; the memory test passed; the stage 2 test was shortened to 2 normal-day runs, Nov 25 by hand and Nov 27 by the timer; layout waits on the client; next session designs Q&A in Telegram).
+Last updated: 2026-11-25, evening (stage 2 built; save-result, the holiday message and the daily records merged into the client repo `main`; the memory test passed; the stage 2 test was shortened to 2 normal-day runs: run 1 done Nov 25 by hand (digest arrived, record saved in the cloud), run 2 is the Nov 27 timer; layout waits on the client; next session designs Q&A in Telegram).
 
 ## Current project: Stock Market Agent
 
@@ -108,25 +108,27 @@ Steps:
 3. Use the brainstorming skill. Design in chat, one question at a time. No design files in git.
 4. Finish test (agreed earlier): every answer cites sources. Hard rules still apply: no "buy now" or "sell now", no number without a source, never an order.
 
-Ahmed does first (Nov 25, not done when this was written): press Run now on the `Daily digest` routine (claude.ai/code/routines), then send what arrived in Telegram and the last line of the run. This is run 1 of the stage 2 test. It writes `records/2026-11-25.json` (the record date is the run's UTC date).
+Run 1 of the stage 2 test, Nov 25 (Ahmed pressed Run now, about 14:30 UTC): the first try failed at `market-status` (`No module named 'requests'`, nothing sent, nothing written, and it sent a phone notification nobody asked for). The setup script on "Stock Market Agent" had not installed it, and we do not know why (the script text could not be read from here). Fix: client repo PR #18 (step 0 of the `daily-digest` skill installs `requests` from `requirements.txt` if missing, and no phone notifications). Second try: the digest arrived (Ahmed said so, he did not send the text or the last line of the run). Checked from the branch: `claude/records` exists with `records/2026-11-25.json` (4 stocks: KO watch, NVDA review, AAPL watch, TSLA watch), and `main` did not move. So the cloud push to a missing branch worked, including the orphan-branch path.
+
+Not checked on run 1: the digest numbers against sources, the run's last line, and whether step 0 or the setup script installed `requests`. One oddity in the record: `close_date` is Nov 24 for KO and NVDA but Nov 25 for AAPL and TSLA, because the run was near the US open. Check on Nov 27 that all four dates match.
 
 Running by itself, check when Ahmed sends what arrived:
-- Nov 25 manual run: check the digest arrived, `requests` was already installed (setup script), the transcript shows `save-result` `"ok": true` for each stock, the last line says records saved, branch `claude/records` has `records/2026-11-25.json`, and `main` did not move. Check the cloud git wording for a missing branch first (the code looks for `couldn't find remote ref`). If a records step failed, the last line names it (pull, compare, save, push).
 - Nov 26 (Thanksgiving, 06:50 Moscow): closed-day message, no record written. It does not count in the stage 2 test. Check it reads well and the cost of a closed-day run.
-- Nov 27 (half day, market open): run 2 of the stage 2 test and the first real compare (`previous_date` is Nov 25). Same checks as Nov 25, and the last line shows the compare result. If both runs pass, stage 2 is done.
+- Nov 27 (half day, market open): run 2 of the stage 2 test and the first real compare (`previous_date` is Nov 25). Check the digest arrived, the transcript shows `save-result` `"ok": true` for each stock, the last line says records saved and shows the compare result, branch `claude/records` has `records/2026-11-27.json`, `main` did not move, and all four `close_date` values match. If both runs pass, stage 2 is done.
 - Nov 30 onward: the timer keeps running and each normal day adds a record.
 - Ahmed deletes the test branches `claude/records-test` and `claude/epic-tesla-swg03d` on GitHub.
 
 ### Other work that does not wait on anyone
 
 1. The Nov 25, Nov 26 and Nov 27 runs: see "Running by itself" above.
-2. Tiny fix: tell the `daily-digest` skill not to send phone notifications.
+2. DONE Nov 25 (client repo PR #18): the `daily-digest` skill now says not to send phone notifications.
 3. Check NVDA, AAPL, KO numbers and the news side against their sources by hand.
 4. Find where the $3,58 per run goes, split by role, from the Nov 25 run transcript.
 5. Check Finnhub's real limits with a real call and its rate-limit headers.
 6. Measure the real subscription cost: compare `/usage` before and after a run. Ahmed will go over prices in the next session.
-7. Stage 7 prep, research only: read the Tradernet MCP server's tool list and write the order tools to block. Nothing connects.
-8. Stage 3 prep: brainstorm in chat where the 2 to 3 candidate stocks come from (one question at a time). No code before the stage 2 test passes.
+7. Find out why the environment setup script did not install `requests` (Ahmed opens the "Stock Market Agent" environment, Edit, Setup script, and sends the text). Step 0 of the skill covers it for now.
+8. Stage 7 prep, research only: read the Tradernet MCP server's tool list and write the order tools to block. Nothing connects.
+9. Stage 3 prep: brainstorm in chat where the 2 to 3 candidate stocks come from (one question at a time). No code before the stage 2 test passes.
 
 ### Waiting on the client (Ahmed asks)
 
