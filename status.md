@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-25, evening (stage 2 built; save-result, the holiday message and the daily records merged into the client repo `main`; the memory test passed; the 5-day test has not started; layout waits on the client; next session checks the Nov 26 and Nov 27 runs).
+Last updated: 2026-11-25, evening (stage 2 built; save-result, the holiday message and the daily records merged into the client repo `main`; the memory test passed; the 5-day test has not started; layout waits on the client; next session designs Q&A in Telegram; the Nov 26 and 27 runs check themselves).
 
 ## Current project: Stock Market Agent
 
@@ -27,6 +27,7 @@ Last updated: 2026-11-25, evening (stage 2 built; save-result, the holiday messa
 - Telegram token and chat ID are plain environment variables (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) on the cloud environment "Stock Market Agent". Anyone who uses that environment can read them. Reason: cloud network secrets only add headers, and Telegram wants the token in the URL. `api.telegram.org` is added to that environment's allowed hosts. Ahmed typed the values himself, never in chat.
 - Ahmed decided Nov 25: everything the client reads is in Russian, headlines included. Where the Russian text comes from is still open.
 - Ahmed decided Nov 25: while we build, Ahmed pays for the runs. Whose subscription pays after that is a stage 6 question.
+- Ahmed decided Nov 25: Q&A in Telegram (stage 5, official plugin) is designed next, before stages 3 and 4, because the client wants to ask questions. The 5-day test of stage 2 runs by itself in the background, so building does not wait for it.
 - Ahmed decided Nov 25: when the US market is closed, the agent still tracks the news and sends a message that the market is closed, with the reason. Built and merged the same day (see below). Weekends stay silent.
 
 ## Built and tested
@@ -88,7 +89,7 @@ Rule: one finish test per stage. If a test fails, say so and stop.
 - Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Russian report per stock, one digest message, in Telegram. Finish test: 5 days in a row with no wrong numbers and the report check passing every time. Use a placeholder digest time until the client answers.
 - Stage 3, weekly review with 2 to 3 candidates. Finish test (proposed, none in the context file): one review where every candidate has sources and nothing says "buy now".
 - Stage 4, urgent alerts. Finish test: alerts are rare enough that he reads them. Also test the 30-minute delay and messages sent on their own.
-- Stage 5, Q&A in Telegram. Finish test: every answer cites sources.
+- Stage 5, Q&A in Telegram. NEXT (moved ahead of stages 3 and 4 by Ahmed, Nov 25). Finish test: every answer cites sources.
 - Stage 6, two-week test with the client. Needs: his watchlist, digest time, price, and whose Claude subscription runs it. The client's setup is decided here.
 - Stage 7, his real Freedom account, read only, then live. Needs his Tradernet read-only keys. First step: add deny rules for order tools, before the first connection.
 
@@ -96,25 +97,26 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 
 ## Next step
 
-### Start here in a fresh session: check the first runs with records
+### Start here in a fresh session: Q&A in Telegram (stage 5)
 
-Why: the daily records are merged but never ran in the cloud. The memory test proved a cloud run can push to a `claude/` branch and a later run can read it. It did not prove our commands or the missing-branch message from the cloud git.
+Why: the client wants to ask questions in the Telegram chat, not only read the digest. Ahmed moved this ahead of stages 3 and 4 (Nov 25).
 
 Steps:
-1. Nov 26 (Thanksgiving, 06:50 Moscow): closed-day message. No record is written on a holiday. Check that the message arrived and reads well, that `requests` was already installed (setup script), and the cost of a closed-day run. Ahmed sends what arrived.
-2. Nov 27 (first normal day): first run with `save-result` and with records. Check:
-   - the digest arrived and its text looks as before;
-   - the run's last line says records saved, and shows the compare result (no previous day yet, so everything is new);
-   - on GitHub, branch `claude/records` has `records/2026-11-27.json`, and `main` did not move;
-   - in the run transcript, `save-result` printed `"ok": true` for each stock, so no result file was typed by hand.
-3. If a records step failed, the run's last line names the step (pull, compare, save, push). Say which one and the exact error. Likely cause to check first: the cloud git wording for a missing branch (the code looks for `couldn't find remote ref`). The digest is not affected.
-4. Nov 30 (second normal day): first real compare against a saved day. Check `previous_date` is Nov 27 and the verdict changes and new URLs make sense.
-5. Ahmed: delete the test branches `claude/records-test` and `claude/epic-tesla-swg03d` on GitHub.
-6. Then: stage 4 design with Ahmed, one question at a time. It has to solve the timer: nothing may run more often than once per hour.
+1. Read the official Claude Code channels docs (code.claude.com/docs) and say which page each claim comes from. Do not answer from memory.
+2. Known problem: the plugin needs a Claude Code session that stays open. A scheduled cloud run starts, finishes and closes. Ahmed's computer sleeps and he has no server. Plan: try it on Ahmed's computer while it is awake. Where it lives for the real client stays a stage 6 decision.
+3. Use the brainstorming skill. Design in chat, one question at a time. No design files in git.
+4. Finish test (agreed earlier): every answer cites sources. Hard rules still apply: no "buy now" or "sell now", no number without a source, never an order.
+
+Running by itself, check when Ahmed sends what arrived:
+- Nov 26 (Thanksgiving, 06:50 Moscow): closed-day message, no record written. Check it reads well, that `requests` was already installed (setup script), and the cost of a closed-day run.
+- Nov 27 (first normal day): first run with `save-result` and records. Check the digest arrived, the run transcript shows `save-result` `"ok": true` for each stock, the run's last line says records saved, branch `claude/records` has `records/2026-11-27.json`, and `main` did not move. If a records step failed, the last line names it (pull, compare, save, push). Check the cloud git wording for a missing branch first (the code looks for `couldn't find remote ref`).
+- Nov 30: first real compare against a saved day (`previous_date` is Nov 27).
+- Ahmed deletes the test branches `claude/records-test` and `claude/epic-tesla-swg03d` on GitHub.
+- Ahmed decides whether Nov 26 counts in the 5-day test (proposed: no).
 
 ### Other work that does not wait on anyone
 
-1. The Nov 26 and Nov 27 runs: see "Start here" above.
+1. The Nov 26 and Nov 27 runs: see "Running by itself" above.
 2. Tiny fix: tell the `daily-digest` skill not to send phone notifications.
 3. Check NVDA, AAPL, KO numbers and the news side against their sources by hand.
 4. Find where the $3,58 per run goes, split by role, from the Nov 25 run transcript.
