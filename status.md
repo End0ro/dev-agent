@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-25 (stage 2 built; save-result and the holiday message merged into the client repo `main`; the 5-day test has not started; layout waits on the client).
+Last updated: 2026-11-25, evening (stage 2 built; save-result and the holiday message merged into the client repo `main`; the 5-day test has not started; layout waits on the client; next session starts with the memory test).
 
 ## Current project: Stock Market Agent
 
@@ -61,7 +61,8 @@ Last updated: 2026-11-25 (stage 2 built; save-result and the holiday message mer
 - Check the digest numbers against their sources by hand. TSLA done Nov 25: the tools output (price, numbers, P/E) matches the hand-typed result file on every number. That is tools against file, not against the Yahoo page or the SEC filing, and the news side is not checked. NVDA, AAPL, KO not checked.
 - Where Russian text for the reason line and headlines comes from (model translation checked by the report check, or lines from the Russian report).
 - No "changed from yesterday" in the digest: cloud sessions start empty.
-- Records idea (Ahmed, Nov 25): keep each day's result files so the next run can read yesterday. It would give: verdict changes with a reason, "new today" vs repeated news, and later a check of verdicts against what the price did next. How: the run saves its files to a branch of the client repo and the next run reads them. First step: a cheap test that a cloud run can push at all (not tested; the task prompt says not to push). Not built. Comes after the 5-day test. Changing the digest during the 5-day test may restart the count: Ahmed decides.
+- Records idea (Ahmed, Nov 25): keep each day's result files so the next run can read yesterday. It would give: verdict changes with a reason, "new today" vs repeated news, and later a check of verdicts against what the price did next. How: the run saves its files to a branch of the client repo and the next run reads them. First step: a cheap test that a cloud run can push (the docs say yes, to a `claude/` branch; not tested; our prompt says do not push). Not built. Comes after the 5-day test. Changing the digest during the 5-day test may restart the count: Ahmed decides.
+- Scheduled task limits (official docs, code.claude.com/docs/en/web-scheduled-tasks, read Nov 25): a schedule that runs more often than once per hour is rejected, so decision 6 (news every 15 minutes) cannot use the timer. Up to 100 scheduled runs per hour per account, and every run draws on the subscription like a normal session. A task can also be started by an HTTP POST to its own `/fire` endpoint with a bearer token (beta), and by GitHub events. A run pushes to a branch prefixed `claude/` by default unless the prompt says otherwise (our `Daily digest` prompt says do not push). The page says nothing about a maximum run time or overlapping runs. Idea for stage 4, not designed: free code outside Claude watches prices and headlines every few minutes and fires the Claude task only when something changed. That needs a timer that works (the GitHub Actions timer never fired in our test) and memory of what was already seen (the records idea).
 - Instagram idea (Ahmed, Nov 25): one Claude prompt plus Airtable gives a Magnificent 7 table with a 0 to 10 score and buy/hold/sell. Not for us as is: it breaks our rules (no buy/sell calls, no number without a source) and has no checks, no timer, no Telegram. Two parts worth keeping: a table of all stocks and history (a possible home for the records idea; Airtable from a cloud run is untested and its AI billing is unknown), and market sentiment as a labelled extra with a source, later.
 - Cost: about $3.58 a run is about $75 over 21 weekdays at list price (my estimate). Ahmed pays while building. Whose subscription pays after that is still open.
 - The token is a plain environment variable, not a network secret. Fine for Ahmed alone, revisit for the client.
@@ -93,17 +94,34 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 
 ## Next step
 
-Waiting on the client (Ahmed asks): digest time, layout, Russian or English headlines in the normal digest.
+### Start here in a fresh session: the memory test
 
-Not waiting on anyone:
+Why: records (yesterday's verdict, "new today" vs repeated news) and stage 4 (urgent alerts need to know which headlines were already seen) both need a cloud run to keep something between runs. Official docs (code.claude.com/docs/en/web-scheduled-tasks, read Nov 25): a scheduled run pushes to a branch prefixed `claude/` by default unless the prompt says otherwise. Our `Daily digest` prompt says "do not push", so nothing has been tried. This test does not touch the digest.
 
-1. Nov 26 run (Thanksgiving, 06:50 Moscow): check that the closed-day message arrived and reads well, that `requests` was already installed (setup script), and measure what a closed-day run costs. Nov 27 run: check the first run with `save-result` (list in `answers_to_bull`, no placeholder text, real `report_check`).
+What to prove: (a) a cloud run can push a file to a `claude/` branch of `End0ro/stock-marker-agent`, and (b) a later, separate run can read that file back.
+
+Steps:
+1. Fresh session: write two short prompts. A: create `records-test/test.txt` holding the UTC time, commit, push to a new branch `claude/records-test`, report the push result in one line. B: fetch that branch, print the file, report one line. Never print any secret. Do not touch `main` or the `Daily digest` routine.
+2. Ahmed creates a one-time routine in claude.ai/code/routines (a task made with the task tool gets no repo), repo `End0ro/stock-marker-agent`, environment "Stock Market Agent", connectors removed, prompt A, and presses "Run now". Then the same for prompt B.
+3. The session checks the result: the branch and file on GitHub, and the run's events (use `list_events` on the run's session).
+4. Pass: the file is on the branch and run B printed its content. Fail: say exactly what failed (permission, branch rule, network) and stop.
+5. Cost: about $0.05 to $0.15 per run (plain runs cost $0.05 to $0.07 on Nov 25). Report the real number. Delete the test branch afterwards.
+6. If it passes: brainstorm what to store (for example each day's result JSON on a `claude/records` branch) and who reads it, then stage 4 design with Ahmed, one question at a time. Stage 4 also has to solve the timer: nothing may run more often than once per hour.
+
+### Other work that does not wait on anyone
+
+1. Nov 26 run (Thanksgiving, 06:50 Moscow): check that the closed-day message arrived and reads well, that `requests` was already installed (setup script), and measure what a closed-day run costs. Nov 27 run: check the first run with `save-result` (list in `answers_to_bull`, no placeholder text, real `report_check`). Ahmed sends what arrived in Telegram.
 2. Tiny fix: tell the `daily-digest` skill not to send phone notifications.
 3. Check NVDA, AAPL, KO numbers and the news side against their sources by hand.
 4. Find where the $3,58 per run goes, split by role, from the Nov 25 run transcript.
 5. Check Finnhub's real limits with a real call and its rate-limit headers.
 6. Ahmed decides whether Nov 26 counts in the 5-day test (proposed: no).
-7. After the 5-day test: the records idea (first a cheap test of whether a cloud run can push), then stage 3.
+7. Stage 7 prep, research only: read the Tradernet MCP server's tool list and write the order tools to block. Nothing connects.
+8. Stage 3 prep: brainstorm in chat where the 2 to 3 candidate stocks come from (one question at a time). No code before the stage 2 test passes.
+
+### Waiting on the client (Ahmed asks)
+
+Digest time, layout, Russian or English headlines in the normal digest.
 
 ## Open questions
 
