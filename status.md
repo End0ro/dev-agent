@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-25, late evening (stage 2 built, run 1 done, run 2 is the Nov 27 timer. Plan changed the same evening: urgent-first reports twice a day come before Q&A, and the dashboard is built last. See "Plan" below. Stage 4a is built and reviewed on the client repo branch `claude/bold-pasteur-ri8b6u` (8 commits, 270 tests pass, pushed, PR #20 open, not merged).)
+Last updated: 2026-11-25, late evening (stage 2 built, run 1 done, run 2 is the Nov 27 timer. Plan changed the same evening: urgent-first reports twice a day come before Q&A, and the dashboard is built last. See "Plan" below. Stage 4a is built and reviewed on the client repo branch `claude/bold-pasteur-ri8b6u` (8 commits, 270 tests pass, pushed, PR #20 merged).)
 
 ## Current project: Stock Market Agent
 
@@ -41,7 +41,7 @@ Last updated: 2026-11-25, late evening (stage 2 built, run 1 done, run 2 is the 
 - Report rules: Russian only, except stock tickers. "Remove brackets" means only the English word in brackets in the verdict line ("наблюдать (watch)" becomes "наблюдать"). Ahmed confirmed Nov 25. The `[n]` source tags stay, because the report checker needs a source marker on every line with a number. "Утренний отчет" replaces "Утренний дайджест".
 - Dashboard: the report becomes an interactive dashboard, built last, together with Ahmed. Telegram will then send only "report is ready" plus the link. Until the dashboard exists, Telegram keeps the full text. Open: the ready message may need an urgent flag word, because urgent items would only be visible in the dashboard.
 - Dashboard hosting test, Nov 25: a Claude artifact. A scheduled cloud run with nobody in the chat updated its data file by itself (run 3, 14 seconds, status succeeded). Test page: https://claude.ai/artifact/2gfofrJUtUDgjBypRUooZE (private, only Ahmed can open it). Not tested: a real report run doing it, sharing with the client, and how the page looks on a phone. Cloudflare Pages was researched and is the fallback if the artifact fails. A public page link must be solved before the real portfolio.
-- Do not merge new report work into the client repo `main`, and do not touch the `Daily digest` routine, until the Nov 27 run is checked. The routine reads `main`.
+- Merge rule: first plan was no merge into the client repo `main` before the Nov 27 run is checked (the routine reads `main`). Ahmed then asked to merge stage 4a at once (Nov 25 late evening): PR #20 is merged. So Nov 26 (closed-day message with prices) and Nov 27 (urgent section with records) are the first cloud runs of the 4a code, and the Nov 27 test proves stage 2 and 4a together. The routine itself is not changed until 4d. For later report work, ask before merging.
 
 ## Built and tested
 
@@ -102,7 +102,7 @@ Rule: one finish test per stage. If a test fails, say so and stop.
 - Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Russian report per stock, one digest message, in Telegram. Finish test (shortened by Ahmed Nov 25 from 5 days): 2 normal market days in a row, no wrong numbers, the report check passing both times, and the second run comparing against the record of the first. Use a placeholder digest time until the client answers.
 - Stage 3, weekly review with 2 to 3 candidates. Finish test (proposed, none in the context file): one review where every candidate has sources and nothing says "buy now". Order of work: after stage 5.
 - Stage 4, urgent-first reports (changed Nov 25, replaces "urgent alerts"). NEXT. Backend only, no dashboard. Four plans, each built on a branch with tests first:
-  - 4a, urgent section. BUILT Nov 25 (not pushed, no PR, not merged). Price alert level (warning/urgent), new high-severity news, no repeats of news already sent, last close price in the holiday message. Report text rules: Russian only except tickers, no English word in brackets in the verdict line, `[n]` source tags stay, title "Утренний отчет". The run also writes the report as a data file (JSON) for the future dashboard. A scratch prototype of the old version passed 259 tests, but its layout changes under the new rules, so it is a reference only.
+  - 4a, urgent section. BUILT and MERGED Nov 25 (PR #20). Price alert level (warning/urgent), new high-severity news, no repeats of news already sent, last close price in the holiday message. Report text rules: Russian only except tickers, no English word in brackets in the verdict line, `[n]` source tags stay, title "Утренний отчет". The run also writes the report as a data file (JSON) for the future dashboard. A scratch prototype of the old version passed 259 tests, but its layout changes under the new rules, so it is a reference only.
   - 4b, Russian risk text and options per urgent item, plus a code check that rejects English words except tickers. Decided by Ahmed Nov 25: the analyst agents write the Russian text themselves (no separate translation step), and the code check enforces it.
   - 4c, the 20:00 short report and a second record per day (morning and evening slots in `records/`), with "no repeats" working across both reports. Quiet day is two lines. Holidays send nothing at 20:00. Also fix a known limit from 4a: news sent in a holiday message comes back as urgent on the next trading day, because holidays write no record (Thanksgiving Nov 26 then Nov 27 is the first case). Other known limits from the 4a review: news hidden by the per-stock limit counts as seen the next day; the urgent price line has no date; a price alert repeats every day while a stock stays 15% below its 20-day high.
   - 4d, schedule switch: 11:00 and 20:00 Moscow time, Monday to Friday. Only after the Nov 27 run is checked and 4a to 4c are merged. Changes the `Daily digest` routine and adds a second routine.
@@ -124,7 +124,7 @@ Ahmed also takes the stage 5 (Q&A in Telegram) questions to a new session.
 
 Background on 4a:
 
-Stage 4a is built (client repo branch `claude/bold-pasteur-ri8b6u`, 8 commits on top of `main` at 0796d88, 270 tests pass, built with subagents, each task reviewed, plus a whole-branch review and one fix commit). It was pushed Nov 25 after Ahmed allowed it (the first tries were blocked by the permission check). PR #20 is open in the client repo, not merged: wait for the Nov 27 run check.
+Stage 4a is built (client repo branch `claude/bold-pasteur-ri8b6u`, 8 commits on top of `main` at 0796d88, merged as PR #20, 270 tests pass, built with subagents, each task reviewed, plus a whole-branch review and one fix commit). It was pushed Nov 25 after Ahmed allowed it (the first tries were blocked by the permission check). PR #20 is merged into the client repo `main` (Nov 25, at Ahmed's request).
 
 What 4a changed (all in the client repo):
 - `tools/alerts.py` (new): alert level from day move and drop from the 20-day high.
@@ -136,7 +136,7 @@ What 4a changed (all in the client repo):
 - Not proven in a cloud run. The routine reads `main`, so nothing runs it until the PR is merged after the Nov 27 check.
 
 Steps:
-1. PR #20 is open ("Stage 4a: urgent section in the report"). Do not merge before the Nov 27 run is checked.
+1. PR #20 is merged (Ahmed asked for it Nov 25). Check the Nov 26 closed-day message and the Nov 27 run: they are the first cloud runs of the 4a code. If something breaks, the fix is a small PR on `main`.
 2. Then stage 4b (risk text and options per urgent item, English-word check). Stack it on the 4a branch or wait for the merge. Use the writing-plans skill, plan in chat, then ask subagents or inline.
 3. Tests first. Hard rules still apply: no "buy now" or "sell now", no number without a source, never an order.
 
