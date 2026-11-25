@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-11-24 (stage 0 done).
+Last updated: 2026-11-25 (stage 1 done).
 
 ## Current project: Stock Market Agent
 
@@ -17,7 +17,12 @@ Last updated: 2026-11-24 (stage 0 done).
 - Halal screening is out. The client handles it.
 - The agent should run on the client's own Claude subscription.
 - Ahmed decided not to re-run Nov 1 to 12 with the new severity rule (about $10). Those results use the old rule.
-- Plan agreed (below): each stage has one finish test, and we do not start the next stage until it passes. The agent runs on Ahmed's own computer for stages 1 to 5. The Telegram test comes first, because it is the biggest unknown.
+- Plan agreed (below): each stage has one finish test, and we do not start the next stage until it passes. The Telegram test comes first, because it is the biggest unknown.
+- Timed sends (stage 1 result, Nov 25): Claude cloud scheduled tasks, not the Telegram plugin and not GitHub Actions. The Telegram plugin is kept only for chat (Q&A, stage 5), which needs a session that stays open.
+- Why not GitHub Actions: the timer never fired. 0 timer runs in 75 minutes (merged 9:15, checked until 10:30 Ahmed's time). Manual runs of the same workflow worked, so the code is fine.
+- Ahmed's computer is not an always-on home (it sleeps). He has no server now. Where the always-on chat session lives is a stage 6 decision with the client.
+- Ahmed lowered the stage 1 finish test from 3 messages to 2, 5 minutes apart. Recurring (daily) runs are not proven yet. Stage 2 (5 days in a row) covers that.
+- Telegram token and chat ID are plain environment variables (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) on the cloud environment "Stock Market Agent". Anyone who uses that environment can read them. Reason: cloud network secrets only add headers, and Telegram wants the token in the URL. `api.telegram.org` is added to that environment's allowed hosts. Ahmed typed the values himself, never in chat.
 
 ## Built and tested
 
@@ -27,8 +32,15 @@ Last updated: 2026-11-24 (stage 0 done).
 - Nov 5 same-input check after the fix: the Warren story was `medium` in 4 of 4 valid runs. Verdicts: `watch` 3 times, `review` once. That `review` was a fallback: the risk-checker returned invalid JSON twice.
 - Risk-checker JSON fix is in `main` (PR #2). Replay of the saved Nov 5 inputs: 0 invalid JSON in 10 runs. Not proof: run 6's exact inputs were not saved, and the retry change was never exercised. 97 unit tests pass.
 - Final review of the branch done. No Critical issues. Findings are in `docs/context.md` under "Before going live".
+- `python -m tools send-telegram --text "..."` in the client repo (PR #4 and #5 merged). 107 unit tests pass. The token is hidden in all error text. Real check with a fake token: Telegram answered 401, exit 1, no token in the output.
+- Stage 1 test, Nov 25: two one-time cloud scheduled tasks set for 11:13 and 11:18 Ahmed's time. Both fired by themselves (1 min 40 s and 17 s late), both reported `sent: True`, no permission denials, and Ahmed confirmed the messages arrived. Each task ran a plain Python snippet with only the standard library, not the repo command. Cost per run was about $0.05 to $0.07 (list price).
 
 ## Open, not done
+
+- The GitHub workflow `telegram-test.yml` in the client repo still has a `schedule:` block (every 5 minutes). It never fired, but if it starts it will message Ahmed every 5 minutes. Remove the block. Asked Ahmed, waiting for his OK.
+- The scheduled tasks use a Claude session per message. Check that this is acceptable for the daily digest, and whose subscription it runs on.
+- A scheduled task did not need the repo for this test. Stage 2 needs the repo (tools, agents). Check that a fresh cloud session can get it.
+- The token is a plain environment variable, not a network secret. Fine for Ahmed alone, revisit for the client.
 
 - Finnhub plan limits are not confirmed (their docs pages would not load for the fetch tool).
 - No deny rules for Tradernet order tools yet. Add them before connecting the broker.
@@ -45,7 +57,7 @@ Last updated: 2026-11-24 (stage 0 done).
 Rule: one finish test per stage. If a test fails, say so and stop.
 
 - Stage 0, close the backtest. DONE Nov 24. Fix merged (PR #2), PR #1 merged. Finish test: 0 failures in 10 replays, on the saved Nov 5 inputs (run 6's inputs were not saved).
-- Stage 1, Telegram sends on its own. Ahmed makes a bot with BotFather, we install the official Telegram plugin on his computer. Finish test: a message from the agent reaches Telegram at a set time with no message from him first, 3 times in a row. If it fails, stop and choose a fallback before building more.
+- Stage 1, Telegram sends on its own. DONE Nov 25. Finish test (changed by Ahmed to 2 messages): 2 cloud scheduled tasks, 5 minutes apart, both fired by themselves, both messages arrived. Built with the `send-telegram` command plus Claude cloud scheduled tasks, not the plugin.
 - Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Russian report per stock, one digest message, in Telegram. Finish test: 5 days in a row with no wrong numbers and the report check passing every time. Use a placeholder digest time until the client answers.
 - Stage 3, weekly review with 2 to 3 candidates. Finish test (proposed, none in the context file): one review where every candidate has sources and nothing says "buy now".
 - Stage 4, urgent alerts. Finish test: alerts are rare enough that he reads them. Also test the 30-minute delay and messages sent on their own.
@@ -57,8 +69,8 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 
 ## Next step
 
-1. Stage 1, Telegram sends on its own. Ahmed has not made a bot yet. First task: he makes one with BotFather (on his phone, in Telegram).
-2. Then break stage 1 into small tasks (bot setup, plugin install on his computer, scheduled send, the 3-in-a-row test), with the brainstorming, plan, tests-first flow.
+1. Remove the `schedule:` block from the GitHub test workflow (needs Ahmed's OK).
+2. Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Brainstorm first. Ahmed's goal: the client gets the report before the US market opens. The time comes from the client, use a placeholder until then. First question to settle: can a fresh cloud scheduled task get the repo and run `analyze-stock`?
 
 ## Open questions
 
