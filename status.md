@@ -44,7 +44,7 @@ Last updated: 2026-11-25 (stage 2 built and merged, daily cloud task created, fi
 - Repo in a cloud task: a task made with the task tool gets no repo, and `git clone` inside a task fails (private repo, no GitHub login). A task made in claude.ai/code/routines with the repo attached does get it. Ahmed made it: name `Daily digest`, `CRON_TZ=Europe/Moscow 50 6 * * 1-5`, repo `End0ro/stock-marker-agent`, environment "Stock Market Agent", connectors removed.
 - First real run, Nov 25, 09:44 UTC ("Run now"): about 12 minutes, about $3.58 at list price. The digest arrived in Telegram. Verdicts: KO watch, NVDA review, AAPL watch, TSLA watch. All four report checks passed. NVDA numbers match the run's own report. Not yet checked against the sources by hand. The task list shows "succeeded" as soon as the run starts, so it does not mean the run is done.
 - Problems from that run:
-  - `requests` was not installed in the cloud container. The run installed it itself, and that is lost after each run. Fix not done yet: Ahmed adds the setup script `pip install -r requirements.txt` to the "Stock Market Agent" environment in claude.ai.
+  - `requests` was not installed in the cloud container. The run installed it itself, and that is lost after each run. Fix added Nov 25 (not proven yet): setup script on the "Stock Market Agent" environment. It runs `pip install -r` on every `requirements.txt` it finds at the top of the checkout or one folder down, and does nothing if there is none. Proof comes from the next fresh run: check that it did not install `requests` by itself.
   - The run rebuilt the result JSON files by hand and shortened some fields (the bear's `answers_to_bull` is a placeholder in NVDA, AAPL, TSLA). Cause not found yet.
   - The run sent itself a phone notification nobody asked for. The Stop hook asked it to commit and push and it correctly declined.
 - Ahmed's feedback on the digest: too much in it, poorly structured, hard for the client to read. Main faults: the stock that needs attention is not first, no reason shown, English headlines in a Russian message, `[n]` tags on every line, repeated "серьёзно", verdict in two languages. Proposed layout (not built): attention first with a short reason, then one line per calm stock. Waiting for the client's answer.
@@ -53,7 +53,6 @@ Last updated: 2026-11-25 (stage 2 built and merged, daily cloud task created, fi
 
 - Stage 2 is not finished. The 5-day finish test has not started. If the task keeps running, days 1 to 5 are Nov 26, 27, 30 and Dec 1, 2. Nov 26 is US Thanksgiving (market closed), so the digest will show the previous close. Ahmed may not want to count that day.
 - Client questions (Ahmed asks): digest time, layout, headlines in Russian or not.
-- Add the `requests` setup script to the environment (Ahmed).
 - Read the Nov 25 run transcript, find why it rebuilt the result JSON by hand, fix the skill, merge with Ahmed's yes.
 - Rebuild the digest layout after the client answers. Add US holiday handling and the price alert level (NVDA was 27,86% below its 20-day high on Nov 25).
 - Check the digest numbers against their sources by hand.
@@ -89,8 +88,8 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 ## Next step
 
 1. Ahmed asks the client for the digest time and layout.
-2. Ahmed adds the `pip install -r requirements.txt` setup script to the "Stock Market Agent" environment.
-3. In a fresh session: read the Nov 25 run transcript (the cloud session titled "Daily digest"), find why the run rebuilt the result JSON by hand, and fix the skill.
+2. Setup script is added. Confirm on the Nov 26 run that `requests` was already there.
+3. In a session with `End0ro/stock-marker-agent` attached (the attach was denied on Nov 25, Ahmed must allow it): read the Nov 25 run transcript (the cloud session titled "Daily digest"), find why the run rebuilt the result JSON by hand, and fix the skill.
 4. Rebuild the layout after the client answers, add holiday handling and the price alert level, check the numbers by hand.
 5. Watch each daily run from Nov 26. Tell Ahmed if a number looks wrong. The 5-day test needs 5 runs in a row with no wrong numbers.
 
