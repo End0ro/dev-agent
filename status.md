@@ -19,6 +19,7 @@ Last updated: 2026-11-25 (stage 1 done).
 - Ahmed decided not to re-run Nov 1 to 12 with the new severity rule (about $10). Those results use the old rule.
 - Plan agreed (below): each stage has one finish test, and we do not start the next stage until it passes. The Telegram test comes first, because it is the biggest unknown.
 - Timed sends (stage 1 result, Nov 25): Claude cloud scheduled tasks, not the Telegram plugin and not GitHub Actions. The Telegram plugin is kept only for chat (Q&A, stage 5), which needs a session that stays open.
+- GitHub test timer removed from `main` (client repo PR #6, Nov 25). The workflow keeps only a manual trigger.
 - Why not GitHub Actions: the timer never fired. 0 timer runs in 75 minutes (merged 9:15, checked until 10:30 Ahmed's time). Manual runs of the same workflow worked, so the code is fine.
 - Ahmed's computer is not an always-on home (it sleeps). He has no server now. Where the always-on chat session lives is a stage 6 decision with the client.
 - Ahmed lowered the stage 1 finish test from 3 messages to 2, 5 minutes apart. Recurring (daily) runs are not proven yet. Stage 2 (5 days in a row) covers that.
@@ -37,7 +38,6 @@ Last updated: 2026-11-25 (stage 1 done).
 
 ## Open, not done
 
-- The GitHub workflow `telegram-test.yml` in the client repo still has a `schedule:` block (every 5 minutes). It never fired, but if it starts it will message Ahmed every 5 minutes. Remove the block. Asked Ahmed, waiting for his OK.
 - The scheduled tasks use a Claude session per message. Check that this is acceptable for the daily digest, and whose subscription it runs on.
 - A scheduled task did not need the repo for this test. Stage 2 needs the repo (tools, agents). Check that a fresh cloud session can get it.
 - The token is a plain environment variable, not a network secret. Fine for Ahmed alone, revisit for the client.
@@ -69,8 +69,7 @@ Only stage 0 and stage 1 are broken into small tasks so far. Break down each lat
 
 ## Next step
 
-1. Remove the `schedule:` block from the GitHub test workflow (needs Ahmed's OK).
-2. Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Brainstorm first. Ahmed's goal: the client gets the report before the US market opens. The time comes from the client, use a placeholder until then. First question to settle: can a fresh cloud scheduled task get the repo and run `analyze-stock`?
+1. Stage 2, daily digest on the made-up portfolio (KO, NVDA, AAPL, TSLA). Brainstorm first. Ahmed's goal: the client gets the report before the US market opens. The time comes from the client, use a placeholder until then. First question to settle: can a fresh cloud scheduled task get the repo and run `analyze-stock`?
 
 ## Open questions
 
