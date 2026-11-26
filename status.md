@@ -128,7 +128,7 @@ Order of work: stage 2 test (Nov 27), stage 4 (4a, 4b, 4c, then 4d), stage 5, st
 - Tried: replay of the saved NVDA Nov 12 data (same data at 20:00 gives the quiet message, a new high item gives a full run, holiday news is not urgent next day). Not tried in a cloud run.
 - Known limits (also in `docs/context.md`, Stage 4c): the full run can disagree with the quick check and show a calm header; an exception inside the urgent pick is skipped; on early-close days in summer the label "рынок открыт" is wrong at 20:00 Moscow; old morning records have no alert level or close date, so the first evening after a morning run on old code costs one extra full analysis; if `records-pull` fails, old news may look new; the first morning after a holiday uses the closed record's date as the since-date. The evening skill has no fallback if the Telegram send fails.
 - Not done: stage 4d (the schedule: 11:00 and 20:00 Moscow time, Monday to Friday, changes the `Daily digest` routine and adds a second one; needs the Nov 27 run checked first). Also still open from before: the whole-report English scan (stage 4 finish test, item 5).
-- Next: check the Nov 26 and Nov 27 runs (see "Running by itself" below). Then stage 4d, then stage 5 (Q&A in Telegram).
+- Next: check the Nov 27 run (see "Running by itself" below; the Nov 26 message is checked, see there). Then stage 4d, then stage 5 (Q&A in Telegram).
 
 ### Stage 4b result (Nov 25 night)
 
@@ -171,7 +171,7 @@ Run 1 of the stage 2 test, Nov 25 (Ahmed pressed Run now, about 14:30 UTC): the 
 Not checked on run 1: the digest numbers against sources, the run's last line, and whether step 0 or the setup script installed `requests`. One oddity in the record: `close_date` is Nov 24 for KO and NVDA but Nov 25 for AAPL and TSLA, because the run was near the US open. Check on Nov 27 that all four dates match.
 
 Running by itself, check when Ahmed sends what arrived:
-- Nov 26 (Thanksgiving, 06:50 Moscow): closed-day message, no record written. It does not count in the stage 2 test. Check it reads well and the cost of a closed-day run.
+- Nov 26 (Thanksgiving, 06:50 Moscow): closed-day message sent. It ran before 4c was merged, so it wrote no record. I wrote `records/2026-11-26-closed.json` by hand on `claude/records` (Nov 26, Ahmed said yes): the 3 news items shown in the message (NVDA 2 high, TSLA 1 medium), not the cut third NVDA item. So Nov 27 should not repeat them as urgent. Prices in the message matched the tools output. It does not count in the stage 2 test. Still unchecked: cost of a closed-day run, headline wording, news severity.
 - Nov 27 (half day, market open): run 2 of the stage 2 test and the first real compare (`previous_date` is Nov 25). Check the digest arrived, the transcript shows `save-result` `"ok": true` for each stock, the last line says records saved and shows the compare result, branch `claude/records` has `records/2026-11-27.json`, `main` did not move, and all four `close_date` values match. If both runs pass, stage 2 is done.
 - Nov 30 onward: the timer keeps running and each normal day adds a record.
 - Ahmed deletes the test branches `claude/records-test` and `claude/epic-tesla-swg03d` on GitHub.
