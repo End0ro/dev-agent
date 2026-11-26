@@ -82,7 +82,7 @@ Last updated: 2026-11-26, morning (stage 4c built, reviewed and MERGED into the 
 - Instagram idea (Ahmed, Nov 25): one Claude prompt plus Airtable gives a Magnificent 7 table with a 0 to 10 score and buy/hold/sell. Not for us as is: it breaks our rules (no buy/sell calls, no number without a source) and has no checks, no timer, no Telegram. Two parts worth keeping: a table of all stocks and history (a possible home for the records idea; Airtable from a cloud run is untested and its AI billing is unknown), and market sentiment as a labelled extra with a source, later.
 - Cost: about $3.58 a run is about $75 over 21 weekdays at list price (my estimate). Ahmed pays while building. Whose subscription pays after that is still open.
 - The token is a plain environment variable, not a network secret. Fine for Ahmed alone, revisit for the client.
-- Finnhub plan limits are not confirmed (their docs pages would not load for the fetch tool).
+- Finnhub limit checked Nov 26 with a real `company-news` call: 60 calls per minute (`X-Ratelimit-Limit: 60`). Only `tools/news.py` calls Finnhub, one call per stock per run, so a morning run uses 4 and the evening check 4 more. Far under the limit. Daily or monthly caps are not shown in the headers, not checked.
 - Small leftovers from the reviews (details in `docs/context.md`, "Not done in stage 2"): no notification rule in the `daily-digest` skill; an unwritable `--out` gives a traceback in `build-digest` and `build-closed-digest`; some `save-result` checks are loose (null date, value types).
 - No deny rules for Tradernet order tools yet. Add them before connecting the broker.
 - Set a real `SEC_USER_AGENT` contact before live use.
@@ -182,7 +182,7 @@ Running by itself, check when Ahmed sends what arrived:
 2. DONE Nov 25 (client repo PR #18): the `daily-digest` skill now says not to send phone notifications.
 3. Check NVDA, AAPL, KO numbers and the news side against their sources by hand.
 4. Find where the $3,58 per run goes, split by role, from the Nov 25 run transcript.
-5. Check Finnhub's real limits with a real call and its rate-limit headers.
+5. DONE Nov 26: Finnhub allows 60 calls per minute, we use 8 a day (see Open, not done).
 6. Measure the real subscription cost: compare `/usage` before and after a run. Ahmed will go over prices in the next session.
 7. Find out why the environment setup script did not install `requests` (Ahmed opens the "Stock Market Agent" environment, Edit, Setup script, and sends the text). Step 0 of the skill covers it for now.
 8. Stage 7 prep, research only: read the Tradernet MCP server's tool list and write the order tools to block. Nothing connects.
